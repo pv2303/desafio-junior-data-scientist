@@ -46,7 +46,8 @@ LIMIT 3;
 
 --------------------------------
  
-## 4. Qual o nome da subprefeitura com mais chamados abertos nesse dia?
+-- 4. Qual o nome da subprefeitura com mais chamados abertos nesse dia?
+
 SELECT bairros.subprefeitura AS nome_subprefeitura,
        COUNT(chamados.id_chamado) AS total_chamados
 FROM `datario.adm_central_atendimento_1746.chamado` AS chamados
