@@ -15,7 +15,7 @@ WHERE DATE(data_inicio) = '2023-04-01';
 
 --------------------------------
 
--- 2. Qual o tipo de chamado que teve mais teve chamado ?
+-- 2. Qual o tipo de chamado que teve mais teve chamados abertos no dia 01/04/2023?
 SELECT 
       tipo,
       COUNT(*) AS total_chamados
@@ -84,11 +84,12 @@ ORDER BY total_chamados DESC;
 SELECT subtipo,
   COUNT(*) AS total_chamados
 FROM `datario.adm_central_atendimento_1746.chamado`
-WHERE subtipo LIKE "%sossego%"
+WHERE (subtipo LIKE "%sossego%"
+OR subtipo LIKE "%Sossego%")
 AND DATE(data_inicio) BETWEEN '2022-01-01' AND '2023-12-31'
 GROUP BY subtipo;
 
--- R: Considerando que não há um subtipo exato "Perturbação do sossego", o subtipo mais próximo é "Fiscalização de perturbação do sossego" com 50.368 chamados entre 01/01/2022 e 31/12/2023. Se considerarmos APENAS os subtipos com a nomenclatura exata "Pertubação do sossego", não houve chamados abertos com esta subcategoria.
+-- R: Entre o período solicitado, não há um subtipo exato de "Perturbação do sossego". Assim, escolhi os subtipos com nomes próximos, a saber: "Fiscalização de perturbação do sossego" com 50.368 chamados abertos e "Informações sobre Perturbação do Sossego" com 11.590. Portanto, se totaliza 61.958 chamados abertos com subtipos relacionados à perturbação do sossego.
 
 -- OBSERVAÇÃO: Considerando que este subtipo será utilizado nas próximas questões, é importante ressaltar que a nomenclatura exata pode variar ao longo do tempo. Assim, é importante considerar outras nomenclaturas que possam ser utilizadas para este tipo de chamado. Portanto, optei por usar o %sossego% para abranger todas as possíveis nomenclaturas que verifiquei na base.
 
