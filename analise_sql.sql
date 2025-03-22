@@ -247,4 +247,4 @@ UNION ALL
 SELECT * FROM media_periodo
 ORDER BY media_diaria DESC;
 
--- R: Entre 2022 e 2023, os cariocas abriram cerca de 85 chamadas por dia em média do tipo "Perturbação do sossego", sendo maior que o número de chamadas médias do carnaval e do Réveillon. Porém, o Rock in Rio ainda possui o principal com o número de reclamações desse tipo, sendo quase 60% maior que a média total do período.
+-- R: Entre 2022 e 2023, os cariocas abriram cerca de 85 chamadas por dia em média do tipo "Perturbação do sossego", sendo maior que o número de chamadas médias do carnaval e do Réveillon. Por outro lado, o Rock in Rio superou o número de reclamações média diárias, sendo quase 60% maior que a média total do período de 2022-2023.
