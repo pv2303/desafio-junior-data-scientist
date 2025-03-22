@@ -77,8 +77,6 @@ ORDER BY total_chamados DESC;
 
 ---------------------------
 
--- Chamados do 1746 em grandes eventos
-
 -- 6. Quantos chamados com o subtipo "Perturbação do sossego" foram abertos desde 01/01/2022 até 31/12/2023 (incluindo extremidades)?
 
 SELECT subtipo,
@@ -112,7 +110,8 @@ chamado_eventos AS (
     subtipo,
   FROM `datario.adm_central_atendimento_1746.chamado`
   WHERE DATE(data_inicio) IN (SELECT data_evento FROM eventos)
-  AND subtipo LIKE "%sossego%"
+  AND (subtipo LIKE "%sossego%"
+    OR subtipo LIKE "%Sossego%")
 )
 
 SELECT *
@@ -139,7 +138,8 @@ chamado_eventos AS (
     subtipo,
   FROM `datario.adm_central_atendimento_1746.chamado`
   WHERE DATE(data_inicio) IN (SELECT data_evento FROM eventos)
-  AND subtipo LIKE "%sossego%"
+  AND (subtipo LIKE "%sossego%"
+    OR subtipo LIKE "%Sossego%")
 )
 
 SELECT 
@@ -150,11 +150,11 @@ LEFT JOIN eventos AS ev
 ON DATE(ch.data_inicio) = ev.data_evento
 GROUP BY ev.evento;
 
--- R: Foram abertos 946 chamados do subtipo Perturbação do sossego no Rock in Rio, 252 no Carnaval e 147 no Réveillon.
+-- R: Foram abertos 946 chamados do subtipo Perturbação do sossego no Rock in Rio, 391 no Carnaval e 239 no Réveillon.
 
 ---------------------------
 
--- 9. Qual evento teve a maior média diária de chamados abertos deese subtipo ?
+-- 9. Qual evento teve a maior média diária de chamados abertos desse subtipo ?
 WITH eventos AS (
   SELECT evento,
   data_evento
@@ -168,7 +168,8 @@ chamados AS (
     DATE(data_inicio) AS data_chamado,
     COUNT(id_chamado) AS total_dia_chamados
   FROM `datario.adm_central_atendimento_1746.chamado`
-  WHERE subtipo LIKE "%sossego%"
+  WHERE (subtipo LIKE "%sossego%"
+    OR subtipo LIKE "%Sossego%")
   GROUP BY data_inicio
 ),
 
@@ -209,7 +210,8 @@ chamados AS (
     DATE(data_inicio) AS data_chamado,
     COUNT(id_chamado) AS total_dia_chamados
   FROM `datario.adm_central_atendimento_1746.chamado`
-  WHERE subtipo LIKE "%sossego%"
+  WHERE (subtipo LIKE "%sossego%"
+    OR subtipo LIKE "%Sossego%")
   GROUP BY data_inicio
 ),
 
@@ -245,4 +247,4 @@ UNION ALL
 SELECT * FROM media_periodo
 ORDER BY media_diaria DESC;
 
--- R: Entre 2022 e 2023, os cariocas abriram cerca de 72 chamadas por dia em média do tipo "Perturbação do sossego", sendo maior que o número de chamadas médias do carnaval e do Réveillon. Porém, o Rock in Rio ainda possui o principal com o número de reclamações desse tipo, sendo quase 90% maior que a média total do período.
+-- R: Entre 2022 e 2023, os cariocas abriram cerca de 85 chamadas por dia em média do tipo "Perturbação do sossego", sendo maior que o número de chamadas médias do carnaval e do Réveillon. Porém, o Rock in Rio ainda possui o principal com o número de reclamações desse tipo, sendo quase 60% maior que a média total do período.
