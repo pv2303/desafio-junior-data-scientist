@@ -91,7 +91,7 @@ GROUP BY subtipo;
 
 -- R: Entre o período solicitado, não há um subtipo exato de "Perturbação do sossego". Assim, escolhi os subtipos com nomes próximos, a saber: "Fiscalização de perturbação do sossego" com 50.368 chamados abertos e "Informações sobre Perturbação do Sossego" com 11.590. Portanto, se totaliza 61.958 chamados abertos com subtipos relacionados à perturbação do sossego.
 
--- OBSERVAÇÃO: Considerando que este subtipo será utilizado nas próximas questões, é importante ressaltar que a nomenclatura exata pode variar ao longo do tempo. Assim, é importante considerar outras nomenclaturas que possam ser utilizadas para este tipo de chamado. Portanto, optei por usar o %sossego% para abranger todas as possíveis nomenclaturas que verifiquei na base.
+-- OBSERVAÇÃO: Considerando que este subtipo será utilizado nas próximas questões, é importante ressaltar que a nomenclatura exata varia ao longo do tempo. Assim, é importante levar em conta outras nomenclaturas que possam ser utilizadas para este tipo de chamado. Portanto, optei por usar o %sossego% para abranger todas as possíveis nomenclaturas que verifiquei na base que são coerentes com este subtipo.
 
 ---------------------------
 
