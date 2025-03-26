@@ -77,28 +77,65 @@ ORDER BY total_chamados DESC;
 
 ---------------------------
 
--- 6. Quantos chamados com o subtipo "Perturbação do sossego" foram abertos desde 01/01/2022 até 31/12/2023 (incluindo extremidades)?
+-- Chamados do 1746 em grandes eventos
+
+-- Utilize a tabela de Chamados do 1746 e a tabela de Ocupação Hoteleira em Grandes Eventos no Rio para as perguntas de 6-10. Para todas as perguntas considere o id_subtipo "5071", referente ao subtipo de chamado Perturbação do sossego. Considere os chamados abertos no período de 01/01/2022 até 31/12/2024 (incluindo extremidades) para todas as perguntas.
+
+
+-- P.S.: Verifiquei a existência de dois grandes eventos que estão na base porém com suas data_inicial e final como nulls. Como foram apenas dois, inferi o intervalo destes eventos a partir da coluna 'ano' que descreve seus períodos e expandi os intervalos de tempo destes também.
+
+-- 6. Quantos chamados com o subtipo "Perturbação do sossego" foram abertos nesse período?
 
 SELECT subtipo,
   COUNT(*) AS total_chamados
 FROM `datario.adm_central_atendimento_1746.chamado`
-WHERE (subtipo LIKE "%sossego%"
-OR subtipo LIKE "%Sossego%")
-AND DATE(data_inicio) BETWEEN '2022-01-01' AND '2023-12-31'
+WHERE id_subtipo = '5071'
+AND DATE(data_inicio) BETWEEN '2022-01-01' AND '2024-12-31'
 GROUP BY subtipo;
 
--- R: Entre o período solicitado, não há um subtipo exato de "Perturbação do sossego". Assim, escolhi os subtipos com nomes próximos, a saber: "Fiscalização de perturbação do sossego" com 50.368 chamados abertos e "Informações sobre Perturbação do Sossego" com 11.590. Portanto, se totaliza 61.958 chamados abertos com subtipos relacionados à perturbação do sossego.
-
--- OBSERVAÇÃO: Considerando que este subtipo será utilizado nas próximas questões, é importante ressaltar que a nomenclatura exata varia ao longo do tempo. Assim, é importante levar em conta outras nomenclaturas que possam ser utilizadas para este tipo de chamado. Portanto, optei por usar o %sossego% para abranger todas as possíveis nomenclaturas que verifiquei na base que são coerentes com este subtipo.
+-- R: Entre o período solicitado, subtipos com id '5071' podem ser tanto a Fiscalização de perturbação do sossego como a Perturbação do sossego. Assim, considerarei ambos para a soma total de 56.785 chamados abertos.
 
 ---------------------------
 
 -- 7. Selecione os chamados com esse subtipo que foram abertos durante os eventos contidos na tabela de eventos (Reveillon, Carnaval e Rock in Rio)
 
-WITH eventos AS (
-  SELECT evento,
-  data_evento
-  FROM `datario.turismo_fluxo_visitantes.rede_hoteleira_ocupacao_eventos`,
+WITH eventos_completos AS (
+  SELECT *
+  FROM `datario.turismo_fluxo_visitantes.rede_hoteleira_ocupacao_eventos`
+  WHERE data_inicial IS NOT NULL
+
+  UNION ALL
+  -- Linha 5: 13/09 a 15/09 / 19/09 a 22/09 de 2024
+  SELECT
+    '13/09 a 15/09 / 19/09 a 22/09 de 2024' AS ano,
+    DATE '2024-09-13' AS data_inicial,
+    DATE '2024-09-15' AS data_final,
+    'Rock in Rio' AS evento,
+    NULL AS taxa_ocupacao
+  
+  UNION ALL
+  SELECT
+    '13/09 a 15/09 / 19/09 a 22/09 de 2024' AS ano,
+    DATE '2024-09-19' AS data_inicial,
+    DATE '2024-09-22' AS data_final,
+    'Rock in Rio' AS evento,
+    NULL AS taxa_ocupacao
+
+  UNION ALL
+  -- Linha 8: 29-31/12 e 01/01 (2024-2025)
+  SELECT
+    '29-31/12 e 01/01 (2024-2025)' AS ano,
+    DATE '2024-12-29' AS data_inicial,
+    DATE '2025-01-01' AS data_final,
+    'Réveillon' AS evento,
+    NULL AS taxa_ocupacao
+),
+
+eventos AS (
+  SELECT 
+    evento,
+    data_evento
+  FROM eventos_completos,
   UNNEST(GENERATE_DATE_ARRAY(data_inicial, data_final)) AS data_evento
   WHERE data_inicial IS NOT NULL
 ),
@@ -110,8 +147,7 @@ chamado_eventos AS (
     subtipo,
   FROM `datario.adm_central_atendimento_1746.chamado`
   WHERE DATE(data_inicio) IN (SELECT data_evento FROM eventos)
-  AND (subtipo LIKE "%sossego%"
-    OR subtipo LIKE "%Sossego%")
+  AND id_subtipo = '5071'
 )
 
 SELECT *
@@ -123,10 +159,43 @@ FROM chamado_eventos;
 
 -- 8. Quantos chamados desse subtipo foram abertos em cada evento?
 
-WITH eventos AS (
-  SELECT evento,
-  data_evento
-  FROM `datario.turismo_fluxo_visitantes.rede_hoteleira_ocupacao_eventos`,
+WITH eventos_completos AS (
+  SELECT *
+  FROM `datario.turismo_fluxo_visitantes.rede_hoteleira_ocupacao_eventos`
+  WHERE data_inicial IS NOT NULL
+
+  UNION ALL
+  -- Linha 5: 13/09 a 15/09 / 19/09 a 22/09 de 2024
+  SELECT
+    '13/09 a 15/09 / 19/09 a 22/09 de 2024' AS ano,
+    DATE '2024-09-13' AS data_inicial,
+    DATE '2024-09-15' AS data_final,
+    'Rock in Rio' AS evento,
+    NULL AS taxa_ocupacao
+  
+  UNION ALL
+  SELECT
+    '13/09 a 15/09 / 19/09 a 22/09 de 2024' AS ano,
+    DATE '2024-09-19' AS data_inicial,
+    DATE '2024-09-22' AS data_final,
+    'Rock in Rio' AS evento,
+    NULL AS taxa_ocupacao
+
+  UNION ALL
+  -- Linha 8: 29-31/12 e 01/01 (2024-2025)
+  SELECT
+    '29-31/12 e 01/01 (2024-2025)' AS ano,
+    DATE '2024-12-29' AS data_inicial,
+    DATE '2025-01-01' AS data_final,
+    'Réveillon' AS evento,
+    NULL AS taxa_ocupacao
+),
+
+eventos AS (
+  SELECT 
+    evento,
+    data_evento
+  FROM eventos_completos,
   UNNEST(GENERATE_DATE_ARRAY(data_inicial, data_final)) AS data_evento
   WHERE data_inicial IS NOT NULL
 ),
@@ -138,8 +207,7 @@ chamado_eventos AS (
     subtipo,
   FROM `datario.adm_central_atendimento_1746.chamado`
   WHERE DATE(data_inicio) IN (SELECT data_evento FROM eventos)
-  AND (subtipo LIKE "%sossego%"
-    OR subtipo LIKE "%Sossego%")
+  AND id_subtipo = '5071'
 )
 
 SELECT 
@@ -150,15 +218,48 @@ LEFT JOIN eventos AS ev
 ON DATE(ch.data_inicio) = ev.data_evento
 GROUP BY ev.evento;
 
--- R: Foram abertos 946 chamados do subtipo Perturbação do sossego no Rock in Rio, 391 no Carnaval e 239 no Réveillon.
+-- R: Foram abertos 946 chamados do subtipo Perturbação do sossego no Rock in Rio, 252 no Carnaval e 325 no Réveillon.
 
 ---------------------------
 
 -- 9. Qual evento teve a maior média diária de chamados abertos desse subtipo ?
-WITH eventos AS (
-  SELECT evento,
-  data_evento
-  FROM `datario.turismo_fluxo_visitantes.rede_hoteleira_ocupacao_eventos`,
+WITH eventos_completos AS (
+  SELECT *
+  FROM `datario.turismo_fluxo_visitantes.rede_hoteleira_ocupacao_eventos`
+  WHERE data_inicial IS NOT NULL
+
+  UNION ALL
+  -- Linha 5: 13/09 a 15/09 / 19/09 a 22/09 de 2024
+  SELECT
+    '13/09 a 15/09 / 19/09 a 22/09 de 2024' AS ano,
+    DATE '2024-09-13' AS data_inicial,
+    DATE '2024-09-15' AS data_final,
+    'Rock in Rio' AS evento,
+    NULL AS taxa_ocupacao
+  
+  UNION ALL
+  SELECT
+    '13/09 a 15/09 / 19/09 a 22/09 de 2024' AS ano,
+    DATE '2024-09-19' AS data_inicial,
+    DATE '2024-09-22' AS data_final,
+    'Rock in Rio' AS evento,
+    NULL AS taxa_ocupacao
+
+  UNION ALL
+  -- Linha 8: 29-31/12 e 01/01 (2024-2025)
+  SELECT
+    '29-31/12 e 01/01 (2024-2025)' AS ano,
+    DATE '2024-12-29' AS data_inicial,
+    DATE '2025-01-01' AS data_final,
+    'Réveillon' AS evento,
+    NULL AS taxa_ocupacao
+),
+
+eventos AS (
+  SELECT 
+    evento,
+    data_evento
+  FROM eventos_completos,
   UNNEST(GENERATE_DATE_ARRAY(data_inicial, data_final)) AS data_evento
   WHERE data_inicial IS NOT NULL
 ),
@@ -168,8 +269,7 @@ chamados AS (
     DATE(data_inicio) AS data_chamado,
     COUNT(id_chamado) AS total_dia_chamados
   FROM `datario.adm_central_atendimento_1746.chamado`
-  WHERE (subtipo LIKE "%sossego%"
-    OR subtipo LIKE "%Sossego%")
+  WHERE id_subtipo = '5071'
   GROUP BY data_inicio
 ),
 
@@ -197,10 +297,43 @@ LIMIT 1;
 
 -- 10. Compare as médias diárias de chamados abertos desse subtipo durante os eventos específicos (Reveillon, Carnaval e Rock in Rio) e a média diária de chamados abertos desse subtipo considerando todo o período de 01/01/2022 até 31/12/2023.
 
-WITH eventos AS (
-  SELECT evento,
-  data_evento
-  FROM `datario.turismo_fluxo_visitantes.rede_hoteleira_ocupacao_eventos`,
+WITH eventos_completos AS (
+  SELECT *
+  FROM `datario.turismo_fluxo_visitantes.rede_hoteleira_ocupacao_eventos`
+  WHERE data_inicial IS NOT NULL
+
+  UNION ALL
+  -- Linha 5: 13/09 a 15/09 / 19/09 a 22/09 de 2024
+  SELECT
+    '13/09 a 15/09 / 19/09 a 22/09 de 2024' AS ano,
+    DATE '2024-09-13' AS data_inicial,
+    DATE '2024-09-15' AS data_final,
+    'Rock in Rio' AS evento,
+    NULL AS taxa_ocupacao
+  
+  UNION ALL
+  SELECT
+    '13/09 a 15/09 / 19/09 a 22/09 de 2024' AS ano,
+    DATE '2024-09-19' AS data_inicial,
+    DATE '2024-09-22' AS data_final,
+    'Rock in Rio' AS evento,
+    NULL AS taxa_ocupacao
+
+  UNION ALL
+  -- Linha 8: 29-31/12 e 01/01 (2024-2025)
+  SELECT
+    '29-31/12 e 01/01 (2024-2025)' AS ano,
+    DATE '2024-12-29' AS data_inicial,
+    DATE '2025-01-01' AS data_final,
+    'Réveillon' AS evento,
+    NULL AS taxa_ocupacao
+),
+
+eventos AS (
+  SELECT 
+    evento,
+    data_evento
+  FROM eventos_completos,
   UNNEST(GENERATE_DATE_ARRAY(data_inicial, data_final)) AS data_evento
   WHERE data_inicial IS NOT NULL
 ),
@@ -210,8 +343,7 @@ chamados AS (
     DATE(data_inicio) AS data_chamado,
     COUNT(id_chamado) AS total_dia_chamados
   FROM `datario.adm_central_atendimento_1746.chamado`
-  WHERE (subtipo LIKE "%sossego%"
-    OR subtipo LIKE "%Sossego%")
+  WHERE id_subtipo = '5071'
   GROUP BY data_inicio
 ),
 
@@ -239,7 +371,7 @@ media_periodo AS (
     'Total do Período' AS evento,
     SUM(total_dia_chamados) / COUNT(DISTINCT data_chamado) AS media_diaria
   FROM chamados
-  WHERE data_chamado BETWEEN '2022-01-01' AND '2023-12-31'
+  WHERE data_chamado BETWEEN '2022-01-01' AND '2024-12-31'
 )
 
 SELECT * FROM media_eventos
@@ -247,4 +379,4 @@ UNION ALL
 SELECT * FROM media_periodo
 ORDER BY media_diaria DESC;
 
--- R: Entre 2022 e 2023, os cariocas abriram cerca de 85 chamadas por dia em média do tipo "Perturbação do sossego", sendo maior que o número de chamadas médias do carnaval e do Réveillon. Por outro lado, o Rock in Rio superou o número de reclamações média diárias, sendo quase 60% maior que a média total do período de 2022-2023.
+-- R: Entre 2022 e 2023, os cariocas abriram cerca de 69 chamadas por dia em média do subtipo "Perturbação do sossego", sendo maior que o número de chamadas médias do carnaval e do Réveillon. Porém, o Rock in Rio ainda possui o principal com o número de reclamações desse tipo, sendo quase 90% maior que a média total do período.
