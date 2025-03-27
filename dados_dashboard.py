@@ -208,8 +208,8 @@ def main():
              path_feriado: df_feriado}
     
     for path, df in paths.items():
-        df.to_csv(path)
-        
+        # separadores ; e decimal com ',' para o Power BI reconhecer corretamente os CSVs
+        df.to_csv(path, sep=';', decimal=',', index=False)
 
 if __name__ == '__main__':
     main()
