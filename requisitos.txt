@@ -1,0 +1,7 @@
+numpy
+pandas
+requests
+basedosdados
+matplotlib
+seaborn
+locale
